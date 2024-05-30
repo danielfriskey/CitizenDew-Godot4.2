@@ -1,0 +1,73 @@
+[gd_scene load_steps=7 format=3 uid="uid://c5kmevog4pymb"]
+
+[ext_resource type="Script" path="res://scripts/player_ship.gd" id="1_yv42r"]
+[ext_resource type="Texture2D" uid="uid://chg6pnwtiq16t" path="res://art/ships/player_ship.png" id="2_sx7nl"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ewbar"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r4g0r"]
+atlas = ExtResource("2_sx7nl")
+region = Rect2(0, 0, 427, 319)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_qn721"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r4g0r")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_nloyi"]
+radius = 17.0
+height = 44.0
+
+[node name="PlayerShip" type="RigidBody2D" groups=["player"]]
+collision_mask = 2
+mass = 25.0
+physics_material_override = SubResource("PhysicsMaterial_ewbar")
+gravity_scale = 0.0
+linear_damp = 1.25
+constant_torque = 10.0
+script = ExtResource("1_yv42r")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 2
+y_sort_enabled = true
+position = Vector2(10, 1)
+scale = Vector2(0.1, 0.092)
+sprite_frames = SubResource("SpriteFrames_qn721")
+animation = &"idle"
+offset = Vector2(15, -10)
+
+[node name="Area2D" type="Area2D" parent="AnimatedSprite2D"]
+position = Vector2(-100, -10)
+scale = Vector2(1e-05, 1e-05)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AnimatedSprite2D/Area2D"]
+y_sort_enabled = true
+position = Vector2(12, -5)
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_nloyi")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+y_sort_enabled = true
+position = Vector2(12, 0)
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_nloyi")
+
+[node name="Camera2D_dynamic" type="Camera2D" parent="."]
+visible = false
+position = Vector2(0, -5)
+enabled = false
+zoom = Vector2(4, 4)
+limit_smoothed = true
+rotation_smoothing_enabled = true
+drag_horizontal_enabled = true
+drag_vertical_enabled = true
+
+[node name="Camera2D_static" type="Camera2D" parent="."]
+zoom = Vector2(4, 4)
+rotation_smoothing_enabled = true
