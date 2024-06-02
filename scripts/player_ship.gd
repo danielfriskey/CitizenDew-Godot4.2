@@ -7,17 +7,18 @@ var target_position = Vector2()
 var target_planet: Node2D
 var rotation_speed = 2.0  # Adjust this value to control the rotation speed
 var max_angular_velocity = PI / 4  # Maximum angular velocity
+var click_position = Vector2()
 
 @onready var animated_sprite = $AnimatedSprite2D
 
 func _ready():
-	target_direction = Vector2()
 	animated_sprite.play("idle")
 
 func _physics_process(_delta):
 	if is_moving:
 		handle_rotation(_delta)
 		apply_central_impulse(target_direction * Global.PLAYER_SPEED)
+		queue_redraw()
 		
 		# Confine the player within the grid boundaries
 		position.x = clamp(position.x, 0, Global.GRID_WIDTH * Global.SQUARE_SIZE)
@@ -26,6 +27,12 @@ func _physics_process(_delta):
 		if is_targeted_movement and position.distance_to(target_position) < (Global.PLANET_SIZE * 0.75):
 			print_planet_info(target_planet)
 			stop_ship()
+
+func _draw():
+	if is_moving:
+		var local_start_position = to_local(position)
+		var local_target_position = to_local(target_position)
+		draw_line(local_start_position, local_target_position, Color.GREEN, 1.0)
 
 func move_to_position(new_position: Vector2):
 	is_targeted_movement = false
@@ -50,7 +57,7 @@ func handle_rotation(delta: float):
 
 func _input(event: InputEvent):
 	if event is InputEventMouseButton and event.pressed and Input.is_action_just_pressed('left_click'):
-		var click_position = get_local_mouse_position()
+		click_position = get_local_mouse_position()
 		move_to_position(click_position)
 
 func _on_body_entered(body: Node):
