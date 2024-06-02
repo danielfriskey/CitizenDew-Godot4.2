@@ -38,7 +38,23 @@ func _draw():
 	if show_line:
 		var local_start_position = to_local(position)
 		var local_target_position = to_local(target_position)
-		draw_line(local_start_position, local_target_position, Color.GREEN, 1.0)
+		var _line_length = local_start_position.distance_to(local_target_position)
+		var segment_count = 10  # Number of segments to create the gradient effect
+
+		for i in range(segment_count):
+			var t1 = float(i) / segment_count
+			var t2 = float(i + 1) / segment_count
+			var start_pos = local_start_position.lerp(local_target_position, t1)
+			var end_pos = local_start_position.lerp(local_target_position, t2)
+			
+			# Use an easing function for smoother alpha blending
+			var alpha = ease_in_out(t2)
+			var color = Color(0, 1, 0, alpha)  # Green color with varying alpha
+			draw_line(start_pos, end_pos, color, 1.0)
+
+# Easing function for smoother alpha blending
+func ease_in_out(t: float) -> float:
+	return t * t * (3.0 - 2.0 * t)
 
 func move_to_position(new_position: Vector2):
 	is_targeted_movement = false
@@ -68,7 +84,7 @@ func handle_rotation(delta: float):
 	var target_rotation = target_direction.angle()
 	rotation = lerp_angle(rotation, target_rotation, rotation_speed * delta)
 
-func move_towards_target(delta: float):
+func move_towards_target(_delta: float):
 	if is_targeted_movement:
 		var distance_to_target = position.distance_to(target_position)
 		if distance_to_target > arrival_threshold:
