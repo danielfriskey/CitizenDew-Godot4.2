@@ -9,7 +9,7 @@ extends Node2D
 @onready var collision_shape: CollisionShape2D = $Area2D/CollisionShape2D
 
 func _ready():
-	sprite.play("default")  # Start the animation
+	sprite.play()
 	sprite.scale = Vector2(Global.PLANET_SCALE_FACTOR, Global.PLANET_SCALE_FACTOR)
 
 	var shape = collision_shape.shape

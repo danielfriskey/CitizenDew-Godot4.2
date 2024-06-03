@@ -142,11 +142,10 @@ func print_planet_info(planet: Node2D):
 			resources = str(planet.get_meta("resources"))
 
 		print("Arrived at Planet:")
-		print("  ID: ", planet_id)
-		print("  Name: ", planet_name)
-		print("  Type: ", planet_type)
-		print("  Shield Strength: ", shield_strength)
+		#print("  ID: ", planet_id)
+		#print("  Name: ", planet_name)
+		#print("  Type: ", planet_type)
+		#print("  Shield Strength: ", shield_strength)
 		print("  Population: ", population)
 		print("  Resources: ", resources)
-		# Debug prints for verification
-		print("Planet Properties: ", planet)
+		print('')

@@ -14,16 +14,19 @@ func save():
 		}
 	}
 	for planet in planet_positions:
-		save_data["planet_positions"].append({
-			"id": planet["id"],
-			"x": planet["position"].x,
-			"y": planet["position"].y,
-			"type": planet["type"],
-			"name": planet["name"],
-			"shield_strength": planet.get("shield_strength", 0),
-			"population": planet.get("population", 0),
-			"resources": planet.get("resources", 0)
-		})
+		save_data["planet_positions"].append(
+			{
+				"id": planet["id"],
+				"home": planet["home"],
+				"status": planet["status"],
+				"name": planet["name"],
+				"x": planet["position"].x,
+				"y": planet["position"].y,
+				"shield_strength": planet.get("shield_strength", 0),
+				"population": planet.get("population", 0),
+				"resources": planet.get("resources", 0)
+			}
+		)
 	file.store_string(JSON.stringify(save_data, "\t"))
 	file.close()
 
@@ -36,17 +39,20 @@ static func load_or_create(mode: String):
 			var save_data = JSON.parse_string(file_contents)
 			if save_data.has("planet_positions"):
 				for planet in save_data["planet_positions"]:
-					res.planet_positions.append({
-						"id": planet["id"],
-						"position": Vector2(planet["x"], planet["y"]),
-						"type": planet["type"],
-						"name": planet["name"],
-						"shield_strength": planet.get("shield_strength", 0),
-						"population": planet.get("population", 0),
-						"resources": planet.get("resources", 0)
-					})
+					res.planet_positions.append(
+						{
+							"id": planet["id"],
+							"home": planet["home"],
+							"status": planet["status"],
+							"name": planet["name"],
+							"position": Vector2(planet["x"], planet["y"]),
+							"shield_strength": planet["shield_strength"],
+							"population": planet["population"],
+							"resources": planet["resources"]
+						}
+					)
 			if save_data.has("player_position"):
-				res.player_position = Vector2(save_data["player_position"]["x"], save_data["player_position"]["y"])
+				res.player_position = Vector2(save_data["player_position"].x, save_data["player_position"].y)
 		file.close()
 	return res
 
