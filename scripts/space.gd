@@ -1,8 +1,6 @@
 extends Node2D
 
-@onready var home_planet_scene = preload("res://scenes/planet.tscn")
-@onready var neutral_planet_scene = preload("res://scenes/neutral_planet.tscn")
-@onready var uninhabited_planet_scene = preload("res://scenes/uninhabited_planet.tscn")
+@onready var planet_scene = preload("res://scenes/planet.tscn")
 @onready var player = $PlayerShip
 @onready var square_borders = $SquareBorders
 @onready var planet_positions = []
@@ -20,9 +18,7 @@ func _ready():
 	generate_planets()
 	square_borders.update_borders()
 	square_borders.create_grid_border()
-	
 	Global.space = self  # Register the space node globally
-	
 	Global.save_data.save()
 	
 	# Set the player position to the home planet position if it exists, otherwise use default
@@ -31,7 +27,7 @@ func _ready():
 	else:
 		var home_planet_position = player.position  # Default to player position
 		for planet_data in planet_positions:
-			if planet_data["type"] == "home":
+			if planet_data["home"]:
 				home_planet_position = Vector2(planet_data["position"].x, planet_data["position"].y)
 				break
 		player.position = home_planet_position
@@ -47,105 +43,104 @@ func _input(event: InputEvent):
 		var query = PhysicsPointQueryParameters2D.new()
 		query.position = click_position
 		var result = space_state.intersect_point(query)
-		
 		var clicked_planet = false
 		for collision in result:
 			if collision.collider.is_in_group("planets"):
 				clicked_planet = true
 				break
-		
 		if not clicked_planet and player:
 			player.move_to_position(click_position)
-
-func generate_planets():
-	if planet_positions.size() == 0:
-		create_planet(player.position, "home", "Home Planet")
-		for i in range(Global.NEUTRAL_PLANET_COUNT):
-			var neutral_planet_position = get_valid_planet_position()
-			create_planet(neutral_planet_position, "neutral", "Neutral Planet " + str(i + 1))
-		for i in range(Global.UNINHABITED_PLANET_COUNT):
-			var uninhabited_planet_position = get_valid_planet_position()
-			create_planet(uninhabited_planet_position, "uninhabited", "Uninhabited Planet " + str(i + 1))
-	else:
-		for planet_data in planet_positions:
-			load_planet(Vector2(planet_data["position"].x, planet_data["position"].y), planet_data)
-
-func create_planet(position: Vector2, planet_type: String, planet_name: String):
-	var planet_scene: Node2D = null
-	match planet_type:
-		"home":
-			planet_scene = home_planet_scene.instantiate()
-		"neutral":
-			planet_scene = neutral_planet_scene.instantiate()
-		"uninhabited":
-			planet_scene = uninhabited_planet_scene.instantiate()
-	if planet_scene:
-		var planet_data = {
-			"id": current_planet_id,
-			"type": planet_type,
-			"name": planet_name,
-			"position": position,
-			"shield_strength": randi_range(1, 15),
-			"population": randi_range(1000, 50000),
-			"resources": randi_range(1, 100)
-		}
-		planet_scene.position = position
-		for key in planet_data.keys():
-			planet_scene.set_meta(key, planet_data[key])
-		# Debug prints for verification
-		#print("Created Planet: ", planet_data)
-		for key in planet_data.keys():
-			pass
-			#print("Meta Key: ", key, " Meta Value: ", planet_scene.get_meta(key))
-		current_planet_id += 1
-		add_child(planet_scene)
-		planet_positions.append(planet_data)
-
-func load_planet(position: Vector2, planet_data: Dictionary):
-	var planet_scene: Node2D = null
-	match planet_data["type"]:
-		"home":
-			planet_scene = home_planet_scene.instantiate()
-		"neutral":
-			planet_scene = neutral_planet_scene.instantiate()
-		"uninhabited":
-			planet_scene = uninhabited_planet_scene.instantiate()
-	if planet_scene:
-		planet_scene.position = position
-		for key in planet_data.keys():
-			planet_scene.set_meta(key, planet_data[key])
-		add_child(planet_scene)
-		
-		planet_scene.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/PlanetNameLabel").text = planet_data['name']
-		planet_scene.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/ShieldStrengthLabel").text = str(planet_data['shield_strength']) + '%'
-		
-		# Debug prints for verification
-		#print("Loaded Planet: ", planet_data)
-		for key in planet_data.keys():
-			pass
-			#print("Meta Key: ", key, " Meta Value: ", planet_scene.get_meta(key))
 
 func get_valid_planet_position() -> Vector2:
 	var new_position = Vector2()
 	var valid_position = false
 	var attempts = 0
 	var max_attempts = 100
-	
 	while not valid_position and attempts < max_attempts:
 		new_position.x = randf_range(margin + planet_radius, grid_width - margin - planet_radius)
 		new_position.y = randf_range(margin + planet_radius, grid_height - margin - planet_radius)
-		
 		valid_position = true
 		for existing_position in planet_positions:
 			if new_position.distance_to(Vector2(existing_position["position"].x, existing_position["position"].y)) < min_distance_between_planets:
 				valid_position = false
 				break
 		attempts += 1
-				
 	if not valid_position:
 		print("Warning: Could not find valid position after", max_attempts, "attempts.")
-	
 	return new_position
 
 func load_planet_data():
 	planet_positions = Global.save_data.planet_positions
+
+func generate_planets():
+	if planet_positions.size() == 0:
+		create_planet(player.position, "friendly", "Home Planet", true)
+		#create_planet(player.position, "hostile", "Enemy Planet", false)
+		for i in range(Global.NEUTRAL_PLANET_COUNT):
+			var neutral_pos = get_valid_planet_position()
+			create_planet(neutral_pos, "neutral", "Neutral Planet " + str(i + 1), false)
+		for i in range(Global.UNINHABITED_PLANET_COUNT):
+			var uninhabited_pos = get_valid_planet_position()
+			create_planet(uninhabited_pos, "uninhabited", "Uninhabited Planet " + str(i + 1), false)
+	else:
+		for planet_data in planet_positions:
+			load_planet(Vector2(planet_data["position"].x, planet_data["position"].y), planet_data)
+
+func create_planet(spawn_pos: Vector2, status: String, planet_name: String, home: bool):
+	var planet_scene = planet_scene.instantiate()
+	var planet_data = {
+		"id": 0,
+		"home": home,
+		"status": status,
+		"name": planet_name,
+		"position": spawn_pos,
+		"shield_strength": 0,
+		"population": 0,
+		"resources": 0
+	}
+	match status:
+		"friendly":
+			planet_data["shield_strength"] = randi_range(1, 50)
+			planet_data["population"] = randi_range(1000, 50000)
+			planet_data["resources"] = randi_range(10, 75)
+		"neutral":
+			planet_data["shield_strength"] = randi_range(1, 25)
+			planet_data["population"] = randi_range(1000, 50000)
+			planet_data["resources"] = randi_range(10, 75)
+		"uninhabited":
+			planet_data["resources"] = randi_range(20, 80)
+			
+	if planet_scene:
+		planet_data["id"] = current_planet_id
+		planet_data["status"] = status
+		planet_data["name"] = planet_name
+		planet_data["position"] = spawn_pos
+		
+		planet_scene.get_node("AnimatedSprite2D").set_animation(planet_data["status"])
+		planet_scene.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/PlanetNameLabel").text = planet_data['name']
+		planet_scene.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/ShieldStrengthLabel").text = str(planet_data['shield_strength']) + '%'
+		
+		planet_scene.position = spawn_pos
+		for key in planet_data.keys():
+			planet_scene.set_meta(key, planet_data[key])
+		
+		current_planet_id += 1
+		add_child(planet_scene)
+		planet_positions.append(planet_data)
+
+func load_planet(spawn_pos: Vector2, planet_data: Dictionary):
+	var planet_scene = planet_scene.instantiate()
+	if planet_scene:
+		planet_scene.position = spawn_pos
+		for key in planet_data.keys():
+			planet_scene.set_meta(key, planet_data[key])
+		add_child(planet_scene)
+		
+		planet_scene.get_node("AnimatedSprite2D").set_animation(planet_data["status"])
+		planet_scene.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/PlanetNameLabel").text = planet_data['name']
+		planet_scene.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/ShieldStrengthLabel").text = str(planet_data['shield_strength']) + '%'
+		
+		if int(planet_data["shield_strength"]) > 20:
+			print(planet_data["name"] + ' has shield above 20%')
+
+

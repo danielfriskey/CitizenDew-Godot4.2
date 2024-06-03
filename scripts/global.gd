@@ -15,7 +15,7 @@ const OUTER_BORDER_COLOR = Color(143 / 255.0, 193 / 255.0, 243 / 255.0)  # LIGHT
 const SUB_GRID_COLOR = Color(34 / 255.0, 34 / 255.0, 34 / 255.0)  # Dark grey color
 
 # Player configuration
-const PLAYER_SPEED = 50
+const PLAYER_SPEED = 100
 
 # PLANET COUNT
 const NEUTRAL_PLANET_COUNT = 15
