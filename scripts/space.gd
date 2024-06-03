@@ -74,73 +74,55 @@ func load_planet_data():
 
 func generate_planets():
 	if planet_positions.size() == 0:
-		create_planet(player.position, "friendly", "Home Planet", true)
-		#create_planet(player.position, "hostile", "Enemy Planet", false)
+		create_or_load_planet(player.position, "friendly", "Home Planet", true)
 		for i in range(Global.NEUTRAL_PLANET_COUNT):
 			var neutral_pos = get_valid_planet_position()
-			create_planet(neutral_pos, "neutral", "Neutral Planet " + str(i + 1), false)
+			create_or_load_planet(neutral_pos, "neutral", "Neutral Planet " + str(i + 1), false)
 		for i in range(Global.UNINHABITED_PLANET_COUNT):
 			var uninhabited_pos = get_valid_planet_position()
-			create_planet(uninhabited_pos, "uninhabited", "Uninhabited Planet " + str(i + 1), false)
+			create_or_load_planet(uninhabited_pos, "uninhabited", "Uninhabited Planet " + str(i + 1), false)
 	else:
 		for planet_data in planet_positions:
-			load_planet(Vector2(planet_data["position"].x, planet_data["position"].y), planet_data)
+			create_or_load_planet(Vector2(planet_data["position"].x, planet_data["position"].y), planet_data["status"], planet_data["name"], planet_data["home"], planet_data)
 
-func create_planet(spawn_pos: Vector2, status: String, planet_name: String, home: bool):
-	var planet_scene = planet_scene.instantiate()
-	var planet_data = {
-		"id": 0,
-		"home": home,
-		"status": status,
-		"name": planet_name,
-		"position": spawn_pos,
-		"shield_strength": 0,
-		"population": 0,
-		"resources": 0
-	}
-	match status:
-		"friendly":
-			planet_data["shield_strength"] = randi_range(1, 50)
-			planet_data["population"] = randi_range(1000, 50000)
-			planet_data["resources"] = randi_range(10, 75)
-		"neutral":
-			planet_data["shield_strength"] = randi_range(1, 25)
-			planet_data["population"] = randi_range(1000, 50000)
-			planet_data["resources"] = randi_range(10, 75)
-		"uninhabited":
-			planet_data["resources"] = randi_range(20, 80)
-			
-	if planet_scene:
+func create_or_load_planet(spawn_pos: Vector2, status: String, planet_name: String, home: bool, planet_data: Dictionary = {}):
+	var planet_instance = planet_scene.instantiate()
+	if planet_data.size() == 0:
+		planet_data = {
+			"id": current_planet_id,
+			"home": home,
+			"status": status,
+			"name": planet_name,
+			"position": spawn_pos,
+			"shield_strength": 0,
+			"population": 0,
+			"resources": 0
+		}
+		match status:
+			"friendly":
+				planet_data["shield_strength"] = randi_range(1, 50)
+				planet_data["population"] = randi_range(1000, 50000)
+				planet_data["resources"] = randi_range(10, 75)
+			"neutral":
+				planet_data["shield_strength"] = randi_range(1, 25)
+				planet_data["population"] = randi_range(1000, 50000)
+				planet_data["resources"] = randi_range(10, 75)
+			"uninhabited":
+				planet_data["resources"] = randi_range(20, 80)
 		planet_data["id"] = current_planet_id
-		planet_data["status"] = status
-		planet_data["name"] = planet_name
-		planet_data["position"] = spawn_pos
-		
-		planet_scene.get_node("AnimatedSprite2D").set_animation(planet_data["status"])
-		planet_scene.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/PlanetNameLabel").text = planet_data['name']
-		planet_scene.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/ShieldStrengthLabel").text = str(planet_data['shield_strength']) + '%'
-		
-		planet_scene.position = spawn_pos
-		for key in planet_data.keys():
-			planet_scene.set_meta(key, planet_data[key])
-		
 		current_planet_id += 1
-		add_child(planet_scene)
 		planet_positions.append(planet_data)
 
-func load_planet(spawn_pos: Vector2, planet_data: Dictionary):
-	var planet_scene = planet_scene.instantiate()
-	if planet_scene:
-		planet_scene.position = spawn_pos
-		for key in planet_data.keys():
-			planet_scene.set_meta(key, planet_data[key])
-		add_child(planet_scene)
-		
-		planet_scene.get_node("AnimatedSprite2D").set_animation(planet_data["status"])
-		planet_scene.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/PlanetNameLabel").text = planet_data['name']
-		planet_scene.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/ShieldStrengthLabel").text = str(planet_data['shield_strength']) + '%'
-		
-		if int(planet_data["shield_strength"]) > 20:
-			print(planet_data["name"] + ' has shield above 20%')
-
-
+	planet_instance.position = spawn_pos
+	for key in planet_data.keys():
+		planet_instance.set_meta(key, planet_data[key])
+	
+	add_child(planet_instance)
+	
+	if planet_instance:
+		planet_instance.get_node("AnimatedSprite2D").set_animation(status)
+		planet_instance.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/PlanetNameLabel").text = planet_name
+		planet_instance.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/ShieldStrengthLabel").text = str(planet_data['shield_strength']) + '%'
+	
+	if int(planet_data["shield_strength"]) > 20:
+		print(planet_data["name"] + ' has shield above 20%')
