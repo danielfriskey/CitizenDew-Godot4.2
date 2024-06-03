@@ -12,6 +12,7 @@ var arrival_threshold = 5.0  # Distance threshold to consider as "arrived"
 var show_line = false
 
 @onready var animated_sprite = $AnimatedSprite2D
+@onready var shooting_point = %ShootingPoint # Reference to ShootingPoint
 
 func _ready():
 	animated_sprite.play("idle")
@@ -33,6 +34,15 @@ func _physics_process(_delta):
 		# Check the length of the line and hide it if the target is reached
 		if position.distance_to(target_position) < arrival_threshold:
 			show_line = false
+
+func shoot():
+	const BULLET = preload("res://scenes/projectiles/bullet.tscn")
+	var new_bullet = BULLET.instantiate()
+	var mouse_position = get_global_mouse_position() # Get mouse position
+	var direction = (mouse_position - shooting_point.global_position).normalized() # Calculate direction
+	new_bullet.global_position = shooting_point.global_position # Set the position of the bullet
+	new_bullet.direction = direction # Set the direction of the bullet
+	get_tree().root.add_child(new_bullet) # Add the bullet to the scene
 
 func _draw():
 	if show_line:
@@ -97,22 +107,25 @@ func move_towards_target(_delta: float):
 		linear_velocity = move_direction * Global.PLAYER_SPEED
 
 func _input(event: InputEvent):
-	if event is InputEventMouseButton and event.pressed and Input.is_action_just_pressed('left_click'):
-		click_position = get_global_mouse_position()
-		var space_state = get_world_2d().direct_space_state
-		var query = PhysicsPointQueryParameters2D.new()
-		query.position = click_position
-		var result = space_state.intersect_point(query)
-		
-		var clicked_planet = false
-		for collision in result:
-			if collision.collider.is_in_group("planets"):
-				clicked_planet = true
-				move_to_planet(collision.collider.position, collision.collider)
-				break
-		
-		if not clicked_planet:
-			move_to_position(click_position)
+	if event is InputEventMouseButton and event.pressed:
+		if Input.is_action_just_pressed('right_click'):
+			shoot()
+		elif Input.is_action_just_pressed('left_click'):
+			click_position = get_global_mouse_position()
+			var space_state = get_world_2d().direct_space_state
+			var query = PhysicsPointQueryParameters2D.new()
+			query.position = click_position
+			var result = space_state.intersect_point(query)
+			
+			var clicked_planet = false
+			for collision in result:
+				if collision.collider.is_in_group("planets"):
+					clicked_planet = true
+					move_to_planet(collision.collider.position, collision.collider)
+					break
+			
+			if not clicked_planet:
+				move_to_position(click_position)
 
 func _on_body_entered(body: Node):
 	if is_targeted_movement and body == target_planet:
@@ -121,31 +134,16 @@ func _on_body_entered(body: Node):
 
 func print_planet_info(planet: Node2D):
 	if planet:
-		var planet_id = "Unknown"
-		var planet_type = "Unknown"
-		var planet_name = "Unknown"
-		var shield_strength = "Unknown"
-		var population = "Unknown"
-		var resources = "Unknown"
-
-		if planet.has_meta("id"):
-			planet_id = str(planet.get_meta("id"))
-		if planet.has_meta("type"):
-			planet_type = planet.get_meta("type")
-		if planet.has_meta("name"):
-			planet_name = planet.get_meta("name")
-		if planet.has_meta("shield_strength"):
-			shield_strength = str(planet.get_meta("shield_strength"))
-		if planet.has_meta("population"):
-			population = str(planet.get_meta("population"))
-		if planet.has_meta("resources"):
-			resources = str(planet.get_meta("resources"))
-
-		print("Arrived at Planet:")
-		#print("  ID: ", planet_id)
-		#print("  Name: ", planet_name)
-		#print("  Type: ", planet_type)
-		#print("  Shield Strength: ", shield_strength)
+		#var planet_id = str(planet.get_meta("id"))
+		#var planet_type = planet.get_meta("type")
+		var planet_name = planet.get_meta("name")
+		#var shield_strength = str(planet.get_meta("shield_strength"))
+		var population = str(planet.get_meta("population"))
+		var resources = str(planet.get_meta("resources"))
+		var alignment = str(planet.get_meta("alignment"))
+		
+		print('')
+		print("Arrived at " + str(planet_name) + ":")
 		print("  Population: ", population)
 		print("  Resources: ", resources)
-		print('')
+		print("  Alignment: ", alignment)

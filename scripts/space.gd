@@ -87,6 +87,8 @@ func generate_planets():
 
 func create_or_load_planet(spawn_pos: Vector2, status: String, planet_name: String, home: bool, planet_data: Dictionary = {}):
 	var planet_instance = planet_scene.instantiate()
+	
+	# CREATE
 	if planet_data.size() == 0:
 		planet_data = {
 			"id": current_planet_id,
@@ -96,23 +98,32 @@ func create_or_load_planet(spawn_pos: Vector2, status: String, planet_name: Stri
 			"position": spawn_pos,
 			"shield_strength": 0,
 			"population": 0,
-			"resources": 0
+			"resources": 0,
+			"alignment": 0
 		}
 		match status:
 			"friendly":
 				planet_data["shield_strength"] = randi_range(1, 50)
 				planet_data["population"] = randi_range(1000, 50000)
 				planet_data["resources"] = randi_range(10, 75)
+				planet_data["alignment"] = randi_range(60, 100)
 			"neutral":
 				planet_data["shield_strength"] = randi_range(1, 100)
 				planet_data["population"] = randi_range(1000, 50000)
 				planet_data["resources"] = randi_range(10, 75)
+				planet_data["alignment"] = randi_range(40, 50)
 			"uninhabited":
 				planet_data["resources"] = randi_range(20, 80)
+			"hostile":
+				planet_data["shield_strength"] = randi_range(1, 50)
+				planet_data["population"] = randi_range(1000, 50000)
+				planet_data["resources"] = randi_range(10, 75)
+				planet_data["alignment"] = randi_range(0, 39)
 		planet_data["id"] = current_planet_id
 		current_planet_id += 1
 		planet_positions.append(planet_data)
-
+	
+	# CREATE AND/OR LOAD
 	planet_instance.position = spawn_pos
 	for key in planet_data.keys():
 		planet_instance.set_meta(key, planet_data[key])
@@ -121,6 +132,9 @@ func create_or_load_planet(spawn_pos: Vector2, status: String, planet_name: Stri
 	
 	if planet_instance:
 		planet_instance.get_node("AnimatedSprite2D").set_animation(status)
+		"""
+		planet_instance.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/AlignmentLabel").text = str(planet_data["alignment"])
 		planet_instance.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/PlanetNameLabel").text = planet_name
 		planet_instance.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/ShieldStrengthLabel").text = str(planet_data['shield_strength']) + '%'
-
+		planet_instance.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/ResourcesLabel").text = 'Resources: ' + str(planet_data['resources']) + ' tons'
+		"""

@@ -24,7 +24,8 @@ func save():
 				"y": planet["position"].y,
 				"shield_strength": planet.get("shield_strength", 0),
 				"population": planet.get("population", 0),
-				"resources": planet.get("resources", 0)
+				"resources": planet.get("resources", 0),
+				"alignment": planet.get("alignment", 0)
 			}
 		)
 	file.store_string(JSON.stringify(save_data, "\t"))
@@ -48,7 +49,8 @@ static func load_or_create(mode: String):
 							"position": Vector2(planet["x"], planet["y"]),
 							"shield_strength": planet["shield_strength"],
 							"population": planet["population"],
-							"resources": planet["resources"]
+							"resources": planet["resources"],
+							"alignment": planet["alignment"]
 						}
 					)
 			if save_data.has("player_position"):

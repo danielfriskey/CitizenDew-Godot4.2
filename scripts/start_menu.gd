@@ -1,7 +1,7 @@
 extends CanvasLayer
 
 func _on_start_new_pressed():
-	Global.save_data.delete_save()  # Delete the existing save data
+	Global.delete_save_data()
 	Global.load_save_data("create")
 	get_tree().change_scene_to_file("res://scenes/game.tscn")
 
