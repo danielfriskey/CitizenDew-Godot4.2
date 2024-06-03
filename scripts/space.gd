@@ -104,7 +104,7 @@ func create_or_load_planet(spawn_pos: Vector2, status: String, planet_name: Stri
 				planet_data["population"] = randi_range(1000, 50000)
 				planet_data["resources"] = randi_range(10, 75)
 			"neutral":
-				planet_data["shield_strength"] = randi_range(1, 25)
+				planet_data["shield_strength"] = randi_range(1, 100)
 				planet_data["population"] = randi_range(1000, 50000)
 				planet_data["resources"] = randi_range(10, 75)
 			"uninhabited":
@@ -123,6 +123,4 @@ func create_or_load_planet(spawn_pos: Vector2, status: String, planet_name: Stri
 		planet_instance.get_node("AnimatedSprite2D").set_animation(status)
 		planet_instance.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/PlanetNameLabel").text = planet_name
 		planet_instance.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/ShieldStrengthLabel").text = str(planet_data['shield_strength']) + '%'
-	
-	if int(planet_data["shield_strength"]) > 20:
-		print(planet_data["name"] + ' has shield above 20%')
+
