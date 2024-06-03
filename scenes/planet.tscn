@@ -1,9 +1,7 @@
-[gd_scene load_steps=158 format=3 uid="uid://dr2gq613pvmv4"]
+[gd_scene load_steps=155 format=3 uid="uid://dr2gq613pvmv4"]
 
 [ext_resource type="Script" path="res://scripts/planet.gd" id="1_3uxe4"]
-[ext_resource type="Texture2D" uid="uid://cyahgelda3nsh" path="res://art/planets/terran.png" id="1_vqpfo"]
 [ext_resource type="Texture2D" uid="uid://du18rfrg2jlok" path="res://art/spritesheet/planets/home.png" id="2_6t14s"]
-[ext_resource type="Shader" path="res://shaders/planet.gdshader" id="2_o0pdj"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_b664g"]
 atlas = ExtResource("2_6t14s")
@@ -1063,10 +1061,6 @@ animations = [{
 "speed": 10.0
 }]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_r4umt"]
-shader = ExtResource("2_o0pdj")
-shader_parameter/color = Color(0.160784, 0.501961, 0.72549, 0.588235)
-
 [sub_resource type="CircleShape2D" id="CircleShape2D_avy5j"]
 radius = 252.0
 
@@ -1077,14 +1071,51 @@ script = ExtResource("1_3uxe4")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_46v32")
 
-[node name="Atmosphere" type="Sprite2D" parent="."]
-visible = false
-z_index = 2
-material = SubResource("ShaderMaterial_r4umt")
-scale = Vector2(10, 10)
-texture = ExtResource("1_vqpfo")
+[node name="Control" type="Control" parent="AnimatedSprite2D"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -250.0
+offset_top = -250.0
+offset_right = -250.0
+offset_bottom = -250.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 2
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="AnimatedSprite2D/Control"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -96.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="AnimatedSprite2D/Control/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 8
+
+[node name="PlanetNameLabel" type="Label" parent="AnimatedSprite2D/Control/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 70
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ShieldStrengthLabel" type="Label" parent="AnimatedSprite2D/Control/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 60
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Area2D" type="Area2D" parent="." groups=["home_planet", "planets"]]
 collision_layer = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]

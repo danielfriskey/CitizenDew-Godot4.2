@@ -1,19 +1,16 @@
-[gd_scene load_steps=7 format=3 uid="uid://c5kmevog4pymb"]
+[gd_scene load_steps=8 format=3 uid="uid://c5kmevog4pymb"]
 
 [ext_resource type="Script" path="res://scripts/player_ship.gd" id="1_yv42r"]
-[ext_resource type="Texture2D" uid="uid://chg6pnwtiq16t" path="res://art/ships/player_ship.png" id="2_sx7nl"]
+[ext_resource type="Shader" path="res://shaders/planet.gdshader" id="3_sy214"]
+[ext_resource type="Texture2D" uid="uid://dnapwhw7l5t3v" path="res://art/ships/spaceship_1.png" id="3_y75s2"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ewbar"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_r4g0r"]
-atlas = ExtResource("2_sx7nl")
-region = Rect2(0, 0, 427, 319)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_qn721"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_r4g0r")
+"texture": ExtResource("3_y75s2")
 }],
 "loop": true,
 "name": &"idle",
@@ -23,6 +20,10 @@ animations = [{
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_nloyi"]
 radius = 17.0
 height = 44.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nifrq"]
+shader = ExtResource("3_sy214")
+shader_parameter/color = Color(0, 0.635294, 0.858824, 0.792157)
 
 [node name="PlayerShip" type="RigidBody2D" groups=["player"]]
 collision_mask = 2
@@ -37,7 +38,7 @@ script = ExtResource("1_yv42r")
 z_index = 2
 y_sort_enabled = true
 position = Vector2(10, 1)
-scale = Vector2(0.1, 0.092)
+scale = Vector2(0.05, 0.05)
 sprite_frames = SubResource("SpriteFrames_qn721")
 animation = &"idle"
 offset = Vector2(15, -10)
@@ -52,10 +53,17 @@ position = Vector2(12, -5)
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_nloyi")
 
+[node name="Shield" type="Sprite2D" parent="AnimatedSprite2D"]
+z_index = 2
+material = SubResource("ShaderMaterial_nifrq")
+scale = Vector2(1.5, 2)
+texture = ExtResource("3_y75s2")
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 y_sort_enabled = true
-position = Vector2(12, 0)
+position = Vector2(10, 0)
 rotation = 1.5708
+scale = Vector2(1.15, 1.15)
 shape = SubResource("CapsuleShape2D_nloyi")
 
 [node name="Camera2D_dynamic" type="Camera2D" parent="."]

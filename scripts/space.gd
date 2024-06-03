@@ -93,9 +93,10 @@ func create_planet(position: Vector2, planet_type: String, planet_name: String):
 		for key in planet_data.keys():
 			planet_scene.set_meta(key, planet_data[key])
 		# Debug prints for verification
-		print("Created Planet: ", planet_data)
+		#print("Created Planet: ", planet_data)
 		for key in planet_data.keys():
-			print("Meta Key: ", key, " Meta Value: ", planet_scene.get_meta(key))
+			pass
+			#print("Meta Key: ", key, " Meta Value: ", planet_scene.get_meta(key))
 		current_planet_id += 1
 		add_child(planet_scene)
 		planet_positions.append(planet_data)
@@ -114,10 +115,15 @@ func load_planet(position: Vector2, planet_data: Dictionary):
 		for key in planet_data.keys():
 			planet_scene.set_meta(key, planet_data[key])
 		add_child(planet_scene)
+		
+		planet_scene.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/PlanetNameLabel").text = planet_data['name']
+		planet_scene.get_node("AnimatedSprite2D/Control/HBoxContainer/VBoxContainer/ShieldStrengthLabel").text = str(planet_data['shield_strength']) + '%'
+		
 		# Debug prints for verification
-		print("Loaded Planet: ", planet_data)
+		#print("Loaded Planet: ", planet_data)
 		for key in planet_data.keys():
-			print("Meta Key: ", key, " Meta Value: ", planet_scene.get_meta(key))
+			pass
+			#print("Meta Key: ", key, " Meta Value: ", planet_scene.get_meta(key))
 
 func get_valid_planet_position() -> Vector2:
 	var new_position = Vector2()
