@@ -12,7 +12,8 @@ var arrival_threshold = 5.0  # Distance threshold to consider as "arrived"
 var show_line = false
 
 @onready var animated_sprite = $AnimatedSprite2D
-@onready var shooting_point = %ShootingPoint # Reference to ShootingPoint
+@onready var shooting_point = %ShootingPoint
+@onready var cannon = $AnimatedSprite2D/Cannon
 
 func _ready():
 	animated_sprite.play("idle")
@@ -34,6 +35,19 @@ func _physics_process(_delta):
 		# Check the length of the line and hide it if the target is reached
 		if position.distance_to(target_position) < arrival_threshold:
 			show_line = false
+
+func _process(delta):
+	update_cannon_rotation()
+
+func update_cannon_rotation():
+	# Get the global position of the mouse
+	var mouse_position = get_global_mouse_position()
+	# Calculate the direction vector from the cannon to the mouse
+	var direction = (mouse_position - cannon.global_position).normalized()
+	# Calculate the angle to face the mouse position
+	var angle_to_mouse = direction.angle()
+	# Adjust the cannon's rotation by subtracting the player's global rotation
+	cannon.rotation = angle_to_mouse - animated_sprite.global_rotation + PI
 
 func shoot():
 	const BULLET = preload("res://scenes/projectiles/bullet.tscn")
@@ -147,3 +161,5 @@ func print_planet_info(planet: Node2D):
 		print("  Population: ", population)
 		print("  Resources: ", resources)
 		print("  Alignment: ", alignment)
+
+
